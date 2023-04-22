@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<!-- Coding By CodingNepal - youtube.com/codingnepal -->
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8" />
+    <title></title>
+    <link rel="stylesheet" href="./css/notes.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Iconscout Link For Icons -->
+    <link
+      rel="stylesheet"
+      href="https://unicons.iconscout.com/release/v4.0.0/css/line.css"
+    />
+  </head>
+  <body>
+    <div class="container">
+      <div class="navbar">
+        <ul>
+          <li><a href="/home">Home</a></li>
+          <li>
+            <a class="active" style="color: #9b59b6" href="/space">Spaces</a>
+          </li>
+          <li><a href="/todo">Todos</a></li>
+          <li><a  onClick="location.replace('/profile?email='+localStorage.getItem('email'))" >Profile</a></li>
+          <li style="float: right">
+            <a onclick="localStorage.clear()" href="/login">Logout</a>
+          </li>
+        </ul>
+      </div>
+
+      <div class="popup-box">
+        <div class="popup">
+          <div class="content">
+            <header>
+              <p></p>
+              <i class="uil uil-times"></i>
+            </header>
+            <form action="/createNote" method="post">
+              <div class="row title">
+                <label>Title</label>
+                <input
+                  type="text"
+                  name="noteTitle"
+                  spellcheck="false"
+                  required
+                />
+              </div>
+              <div class="row description">
+                <label>Description</label>
+                <textarea
+                  spellcheck="false"
+                  name="noteText"
+                  required
+                ></textarea>
+              </div>
+              <button></button>
+            </form>
+          </div>
+        </div>
+      </div>
+      <div class="wrapper">
+        <li class="add-box">
+          <div class="icon"><i class="uil uil-plus"></i></div>
+          <p>Add new Note</p>
+          <h1>Space No: <%= spaceId %></h1>
+        </li>
+      </div>
+    </div>
+
+    <script>
+
+      if (
+        localStorage.getItem("email") == null ||
+        localStorage.getItem("email") == undefined ||
+        localStorage.getItem("email") == ""
+      ) {
+        location.replace("/login");
+      }
+      const addBox = document.querySelector(".add-box"),
+        popupBox = document.querySelector(".popup-box"),
+        popupTitle = popupBox.querySelector("header p"),
+        closeIcon = popupBox.querySelector("header i"),
+        titleTag = popupBox.querySelector("input"),
+        descTag = popupBox.querySelector("textarea"),
+        addBtn = popupBox.querySelector("button");
+
+      const months = [
+        "January",
+        "February",
+        "March",
+        "April",
+        "May",
+        "June",
+        "July",
+        "August",
+        "September",
+        "October",
+        "November",
+        "December",
+      ];
+      // const notes = JSON.parse(localStorage.getItem("notes") || "[]");
+
+      let spaceId = "<%- JSON.stringify(spaceId) %>";
+      let notes = '<%- notes %>';
+      notes = JSON.parse(notes);
+
+
+      let isUpdate = false,
+        updateId;
+
+      addBox.addEventListener("click", () => {
+        popupTitle.innerText = "Add a New Note";
+        addBtn.innerText = "Add Note";
+        popupBox.classList.add("show");
+        document.querySelector("body").style.overflow = "hidden";
+        if (window.innerWidth > 660) titleTag.focus();
+      });
+
+      closeIcon.addEventListener("click", () => {
+        isUpdate = false;
+        titleTag.value = descTag.value = "";
+        popupBox.classList.remove("show");
+        document.querySelector("body").style.overflow = "auto";
+      });
+
+      function showNotes() {
+        if (!notes) return;
+        document.querySelectorAll(".note").forEach((li) => li.remove());
+
+        notes.forEach((note, id) => {
+          let filterDesc = note.noteText.replaceAll("\n", "<br/>");
+          let liTag = `<li class="note">
+                        <div class="details">
+                            <p>${note.noteTitle}</p>
+                            <span>${filterDesc}</span>
+                        </div>
+                        <div class="bottom-content">
+                            <span>${note.date}</span>
+                            <div class="settings">
+                                <i onclick="showMenu(this)" class="uil uil-ellipsis-h"></i>
+                                <ul class="menu">
+                                    <li onclick="updateNote(${note.noteId}, '${note.noteTitle}', '${filterDesc}')"><i class="uil uil-pen"></i>Edit</li>
+                                    <li onclick="deleteNote(${note.noteId})"><i class="uil uil-trash"></i>Delete</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </li>`;
+          addBox.insertAdjacentHTML("afterend", liTag);
+        });
+      }
+      showNotes();
+
+      function showMenu(elem) {
+        elem.parentElement.classList.add("show");
+        document.addEventListener("click", (e) => {
+          if (e.target.tagName != "I" || e.target != elem) {
+            elem.parentElement.classList.remove("show");
+          }
+        });
+      }
+
+      function deleteNote(noteId) {
+        let confirmDel = confirm("Are you sure you want to delete this note?");
+        if (!confirmDel) return;
+
+        fetch("/deleteNote", {
+          method: "POST",
+          headers: {
+            accept: "application.json",
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ spaceId: spaceId, noteId: noteId }),
+        })
+          .then((data) => {
+            console.log(data);
+          })
+          .catch((err) => {
+            console.log(err);
+          });
+
+        notes = notes.filter((note) => {
+
+          if (note.noteId != noteId) {
+            return note;
+          }
+        });
+        showNotes();
+      }
+
+      function updateNote(noteId, title, filterDesc) {
+        let description = filterDesc.replaceAll("<br/>", "\r\n");
+        updateId = noteId;
+        isUpdate = true;
+        addBox.click();
+        titleTag.value = title;
+        descTag.value = description;
+
+        popupTitle.innerText = "Update a Note";
+        addBtn.innerText = "Update Note";
+      }
+
+      addBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+        let noteTitle = titleTag.value.trim(),
+          noteText = descTag.value.trim();
+
+        if (noteTitle || noteText) {
+          let currentDate = new Date(),
+            month = months[currentDate.getMonth()],
+            day = currentDate.getDate(),
+            year = currentDate.getFullYear();
+
+          if (isUpdate) {
+            let noteInfo = {
+              noteTitle,
+              noteText,
+              date: `${month} ${day}, ${year}`,
+              spaceId: spaceId,
+              noteId: updateId,
+            };
+            console.log(noteInfo);
+            isUpdate = false;
+            notes = notes.map((note) => {
+              if (note.noteId == updateId) {
+                return noteInfo;
+              } else {
+                return note;
+              }
+            });
+
+            fetch("/updateNote", {
+              method: "POST",
+              headers: {
+                accept: "application.json",
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify(noteInfo),
+            })
+              .then((data) => {})
+              .catch((err) => {
+                console.log(err);
+              });
+
+          } else {
+            let noteInfo = {
+              noteTitle,
+              noteText,
+              date: `${month} ${day}, ${year}`,
+              spaceId: spaceId,
+              noteId:Math.floor(Math.random() * 1000)
+            };
+            notes.push(noteInfo);
+            fetch("/createNote", {
+              method: "POST",
+              headers: {
+                accept: "application.json",
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify(noteInfo),
+            })
+              .then((data) => {})
+              .catch((err) => {
+                console.log(err);
+              });
+          }
+
+          showNotes();
+          closeIcon.click();
+        }
+      });
+    </script>
+
+    <!-- <script src="./js/notes.js"></script> -->
+  </body>
+</html>
