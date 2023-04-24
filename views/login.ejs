@@ -9,21 +9,25 @@
   <body>
     <div class="container">
       <div class="wrapper">
-        <div class="title"><span>Login Form</span></div>
+        <div class="logo"><img src="./img/logo.jpeg"/></div>
+        <div class="title"><span>Login here or sign-up for free</span></div>
         <form action="/checkUserLogin" method="post">
           <div class="row">
-            <i class="fas fa-user"></i>
             <input type="email" placeholder="Email" name="email" required>
           </div>
           <div class="row">
-            <i class="fas fa-lock"></i>
             <input type="password" placeholder="Password" name="password" required>
           </div>
           <div class="pass"><a href="/forgetPassword">Forgot password?</a></div>
-          <div class="row button">
-            <input  onClick="setItem()" type="submit" value="Login">
+          <div class="row button" style="display:flex;justify-content:center;align-items: center;">
+            <input  onClick="setItem()" type="submit" value="Continue">
           </div>
-          <div class="signup-link">Not a member? <a href="/registration">Signup now</a></div>
+          <div class="row button" style="align-items: center;text-align: center;">
+            <p style="color:white;margin-bottom: 5px;"> Don't have an account yet?</p>
+        
+            <input  onClick="location.replace('/registration')" style="text-align:center" value="Create an account">
+          </div>
+
         </form>
       </div>
     </div>

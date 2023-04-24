@@ -11,21 +11,58 @@
       rel="stylesheet"
       href="https://unicons.iconscout.com/release/v4.0.0/css/line.css"
     />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
   </head>
   <body>
+    <div id="block-container" style="z-index: 100;">
+      <header style="float:right;font-size:1.5em;cursor:pointer" onclick="closeTheNote()" >
+        <i class="uil uil-times"></i>
+      </header>
+
+    </div>
+
     <div class="container">
       <div class="navbar">
         <ul>
-          <li><a href="/home">Home</a></li>
           <li>
-            <a class="active" style="color: #9b59b6" href="/space">Spaces</a>
+            <a
+              style="cursor: pointer"
+              class="active"
+              onClick="location.replace('/home?email='+localStorage.getItem('email'))"
+              >Home</a
+            >
           </li>
-          <li><a href="/todo">Todos</a></li>
-          <li><a  onClick="location.replace('/profile?email='+localStorage.getItem('email'))" >Profile</a></li>
+          <li>
+            <a
+              style="color: #9b59b6; cursor: pointer"
+              onClick="location.replace('/space?email='+localStorage.getItem('email'))"
+              >Spaces</a
+            >
+          </li>
+          <li>
+            <a
+              style="cursor: pointer"
+              onClick="location.replace('/todo?email='+localStorage.getItem('email'))"
+              >Todos</a
+            >
+          </li>
+          <li>
+            <a
+              style="cursor: pointer"
+              onClick="location.replace('/profile?email='+localStorage.getItem('email'))"
+              >Profile</a
+            >
+          </li>
           <li style="float: right">
             <a onclick="localStorage.clear()" href="/login">Logout</a>
           </li>
         </ul>
+      </div>
+
+      <div
+        class = "space"
+      >
+        Space No: <%=spaceIdNo%>
       </div>
 
       <div class="popup-box">
@@ -40,6 +77,7 @@
                 <label>Title</label>
                 <input
                   type="text"
+                  id="title"
                   name="noteTitle"
                   spellcheck="false"
                   required
@@ -48,10 +86,32 @@
               <div class="row description">
                 <label>Description</label>
                 <textarea
+                  id="text"
                   spellcheck="false"
                   name="noteText"
                   required
                 ></textarea>
+              </div>
+              <div class="row choose">
+                <label for="color-picker">Text color:</label>
+                <input type="color" id="color-picker" name="color">
+            
+                <label for="size-selector">Font size:</label>
+                <select id="size-selector" name="size">
+                  <option value="12px">12</option>
+                  <option value="14px">14</option>
+                  <option value="16px">16</option>
+                  <option value="18px">18</option>
+                  <option value="20px">20</option>
+                </select>
+            
+                <label for="style-selector">Font style:</label>
+                <select id="style-selector" name="font">
+                  <option value="Arial">Arial</option>
+                  <option value="Verdana">Verdana</option>
+                  <option value="Helvetica">Helvetica</option>
+                  <option value="Times New Roman">Times New Roman</option>
+                </select>
               </div>
               <button></button>
             </form>
@@ -59,16 +119,17 @@
         </div>
       </div>
       <div class="wrapper">
-        <li class="add-box">
-          <div class="icon"><i class="uil uil-plus"></i></div>
-          <p>Add new Note</p>
-          <h1>Space No: <%= spaceId %></h1>
-        </li>
+        <li class="add-box" style="display: none"></li>
+      </div>
+
+      <div
+        class="addtri"
+      >
+        New Note
       </div>
     </div>
 
     <script>
-
       if (
         localStorage.getItem("email") == null ||
         localStorage.getItem("email") == undefined ||
@@ -77,12 +138,19 @@
         location.replace("/login");
       }
       const addBox = document.querySelector(".add-box"),
-        popupBox = document.querySelector(".popup-box"),
-        popupTitle = popupBox.querySelector("header p"),
-        closeIcon = popupBox.querySelector("header i"),
-        titleTag = popupBox.querySelector("input"),
-        descTag = popupBox.querySelector("textarea"),
-        addBtn = popupBox.querySelector("button");
+        addtri = document.querySelector(".addtri");
+      (popupBox = document.querySelector(".popup-box")),
+        (popupTitle = popupBox.querySelector("header p")),
+        (closeIcon = popupBox.querySelector("header i")),
+        (titleTag = popupBox.querySelector("#title")),
+        (descTag = popupBox.querySelector("#text")),
+        (colorTag = popupBox.querySelector("#color-picker")),
+        (sizeTag = popupBox.querySelector("#size-selector")),
+        (fontTag = popupBox.querySelector("#style-selector")),
+        (addBtn = popupBox.querySelector("button"));
+
+     
+
 
       const months = [
         "January",
@@ -98,17 +166,17 @@
         "November",
         "December",
       ];
-      // const notes = JSON.parse(localStorage.getItem("notes") || "[]");
 
       let spaceId = "<%- JSON.stringify(spaceId) %>";
+      let email = '<%-email%>'
       let notes = '<%- notes %>';
       notes = JSON.parse(notes);
-
+      notes.reverse();
 
       let isUpdate = false,
         updateId;
 
-      addBox.addEventListener("click", () => {
+      addtri.addEventListener("click", () => {
         popupTitle.innerText = "Add a New Note";
         addBtn.innerText = "Add Note";
         popupBox.classList.add("show");
@@ -118,7 +186,7 @@
 
       closeIcon.addEventListener("click", () => {
         isUpdate = false;
-        titleTag.value = descTag.value = "";
+        titleTag.value = descTag.value = colorTag.value = sizeTag = fontTag = "";
         popupBox.classList.remove("show");
         document.querySelector("body").style.overflow = "auto";
       });
@@ -129,8 +197,11 @@
 
         notes.forEach((note, id) => {
           let filterDesc = note.noteText.replaceAll("\n", "<br/>");
-          let liTag = `<li class="note">
-                        <div class="details">
+          let titleDesc = note.noteTitle;
+          let liTag = `<li class="note" style="position:relative" >
+            <i class="fa fa-expand" onclick="showCompleteNote('${titleDesc}' , '${filterDesc}' , '${note.color}' , '${note.size}' , '${note.font}')" style="cursor:pointer;position:absolute;font-size:24px;right:10px;top:10px;color:black"></i>            
+            <div class="details">
+                            <p>Note : ${notes.length - id} </p>
                             <p>${note.noteTitle}</p>
                             <span>${filterDesc}</span>
                         </div>
@@ -139,8 +210,11 @@
                             <div class="settings">
                                 <i onclick="showMenu(this)" class="uil uil-ellipsis-h"></i>
                                 <ul class="menu">
-                                    <li onclick="updateNote(${note.noteId}, '${note.noteTitle}', '${filterDesc}')"><i class="uil uil-pen"></i>Edit</li>
-                                    <li onclick="deleteNote(${note.noteId})"><i class="uil uil-trash"></i>Delete</li>
+                                    <li onclick="updateNote(${note.noteId}, '${
+            note.noteTitle}', '${filterDesc}' , '${note.color}' , '${note.size}' , '${note.font}')"><i class="uil uil-pen"></i>Edit</li>
+                                    <li onclick="deleteNote(${
+                                      note.noteId
+                                    })"><i class="uil uil-trash"></i>Delete</li>
                                 </ul>
                             </div>
                         </div>
@@ -149,6 +223,46 @@
         });
       }
       showNotes();
+
+      function closeTheNote(){
+        const blockContainer = document.getElementById("block-container");
+          
+    
+        const lastChild = blockContainer.lastChild;
+        const secondLastChild = lastChild.previousSibling;
+
+        blockContainer.removeChild(lastChild);
+        blockContainer.removeChild(secondLastChild);
+        blockContainer.style.display = "none";
+
+      }
+
+      function showCompleteNote( titleV, descriptionV , color , size , font) {
+        const blockContainer = document.getElementById("block-container");
+        if( blockContainer.style.display == "block" ){return;}
+
+      
+        const title = document.createElement("h2");
+        const description = document.createElement("p");
+
+        // Set the text content of the h2 and p elements
+        title.textContent = titleV;
+        description.textContent = descriptionV;
+        description.style.border = '1px solid black';
+        description.style.height = '80%';
+        description.style.width = '100%';
+        description.style.color = color;
+        description.style.fontSize = size;
+        description.style.fontStyle = font;
+        description.style.padding = '10px';
+
+        // Append the h2 and p elements to the blockContainer div
+        blockContainer.appendChild(title);
+        blockContainer.appendChild(description);
+
+        // Set the display style of the blockContainer div to "block"
+        blockContainer.style.display = "block";
+      }
 
       function showMenu(elem) {
         elem.parentElement.classList.add("show");
@@ -169,7 +283,7 @@
             accept: "application.json",
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ spaceId: spaceId, noteId: noteId }),
+          body: JSON.stringify({ spaceId: spaceId, noteId: noteId , email:email }),
         })
           .then((data) => {
             console.log(data);
@@ -179,7 +293,6 @@
           });
 
         notes = notes.filter((note) => {
-
           if (note.noteId != noteId) {
             return note;
           }
@@ -187,22 +300,30 @@
         showNotes();
       }
 
-      function updateNote(noteId, title, filterDesc) {
+      function updateNote(noteId, title, filterDesc , color , size , font) {
         let description = filterDesc.replaceAll("<br/>", "\r\n");
         updateId = noteId;
         isUpdate = true;
-        addBox.click();
+       
         titleTag.value = title;
         descTag.value = description;
+        colorTag.value = color;
+        sizeTag.value = size;
+        fontTag.value = font;
+        popupBox.classList.add("show");
 
         popupTitle.innerText = "Update a Note";
         addBtn.innerText = "Update Note";
+         addBox.click();
       }
 
       addBtn.addEventListener("click", (e) => {
         e.preventDefault();
         let noteTitle = titleTag.value.trim(),
-          noteText = descTag.value.trim();
+          noteText = descTag.value.trim(),
+          noteColor = colorTag.value,
+          noteSize = sizeTag.value,
+          noteFont = fontTag.value;
 
         if (noteTitle || noteText) {
           let currentDate = new Date(),
@@ -217,6 +338,10 @@
               date: `${month} ${day}, ${year}`,
               spaceId: spaceId,
               noteId: updateId,
+              color:noteColor,
+              size:noteSize,
+              font:noteFont,
+              email:email,
             };
             console.log(noteInfo);
             isUpdate = false;
@@ -240,14 +365,17 @@
               .catch((err) => {
                 console.log(err);
               });
-
           } else {
             let noteInfo = {
               noteTitle,
               noteText,
               date: `${month} ${day}, ${year}`,
               spaceId: spaceId,
-              noteId:Math.floor(Math.random() * 1000)
+              noteId: Math.floor(Math.random() * 1000),
+              color:noteColor,
+              size:noteSize,
+              font:noteFont,
+              email:email,
             };
             notes.push(noteInfo);
             fetch("/createNote", {

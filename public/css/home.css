@@ -1,35 +1,35 @@
 /* Import Google font - Poppins */
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap");
 
-*{
+* {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: 'Poppins', sans-serif;
+  font-family: "Poppins", sans-serif;
 }
 
-body{
-  background: #9B59B6;
+body {
+  background: black;
 }
 
-.wrapper{
-  margin:50px;
+.wrapper {
+  margin: 50px;
   width: 450px;
-  height:450px;
-  background: #fff;
+  height: 450px;
+  background: lightgrey;
   border-radius: 10px;
-  box-shadow: 0 15px 40px rgba(0,0,0,0.12);
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.12);
 }
-.wrapper header{
+.wrapper header {
   display: flex;
   align-items: center;
   padding: 25px 30px 10px;
   justify-content: space-between;
 }
-header .icons{
+header .icons {
   display: flex;
 }
-header .icons span{
+header .icons span {
   height: 38px;
   width: 38px;
   margin: 0 1px;
@@ -42,54 +42,59 @@ header .icons span{
   border-radius: 50%;
 }
 
-.icons span:last-child{
+.icons span:last-child {
   margin-right: -10px;
 }
 
-.list{
-  margin:25px;
+.list {
+  margin: 25px;
 }
-header .icons span:hover{
+header .icons span:hover {
   background: #f2f2f2;
 }
-header .current-date{
+header .current-date {
   font-size: 1.45rem;
   font-weight: 500;
 }
-.calendar{
+.calendar {
   padding: 20px;
 }
-.calendar ul{
+.calendar ul {
   display: flex;
   flex-wrap: wrap;
   list-style: none;
   text-align: center;
 }
-.calendar .days{
+.calendar .days {
   margin-bottom: 20px;
 }
-.calendar li{
+.calendar li {
   color: #333;
   width: calc(100% / 7);
   font-size: 1.07rem;
 }
-.calendar .weeks li{
+.calendar .weeks li {
   font-weight: 500;
   cursor: default;
 }
-.calendar .days li{
+.calendar .days li {
   z-index: 1;
   cursor: pointer;
   position: relative;
   margin-top: 30px;
 }
-.days li.inactive{
-  color: #aaa;
+.days li.inactive {
+  color: white;
 }
-.days li.active{
+.days li.active {
   color: #fff;
 }
-.days li::before{
+
+.days li.deadline {
+  color: #fff;
+}
+
+.days li::before {
   position: absolute;
   content: "";
   left: 50%;
@@ -100,23 +105,53 @@ header .current-date{
   border-radius: 50%;
   transform: translate(-50%, -50%);
 }
-.days li.active::before{
-  background: #9B59B6;
-}
-.days li:not(.active):hover::before{
-  background: #f2f2f2;
+
+.days li.active::before {
+  background: #9b59b6;
 }
 
-@media (max-width: 660px){
-  .wrapper{
+.days li.deadline::before {
+  background: red;
+}
+
+.days li:not(.active):hover::before {
+  opacity: 0.5;
+}
+
+.days li:not(.deadline):hover::before {
+  opacity: 0.5;
+}
+
+@keyframes blink {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.deadline {
+  animation: blink 2s ease-in-out infinite;
+}
+
+.highalert {
+  animation: blink 0.5s ease-in-out infinite;
+}
+
+@media (max-width: 660px) {
+  .wrapper {
     margin: 15px;
     gap: 15px;
     grid-template-columns: repeat(auto-fill, 100%);
   }
-  .popup-box .popup{
+  .popup-box .popup {
     max-width: calc(100% - 15px);
   }
-  .bottom-content .settings i{
+  .bottom-content .settings i {
     font-size: 17px;
   }
 }
@@ -145,5 +180,8 @@ header .current-date{
   background-color: #111;
 }
 
-
-
+.bottom {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}

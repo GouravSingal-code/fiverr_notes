@@ -42,6 +42,7 @@ db.once("open", function () {
 app.get('/profile' , (req , res)=>{
   user.findOne({email:req.query.email})
   .then(data=>{
+    console.log(data);
     res.render('profile.ejs' , {fname:data.fname , lname:data.lname , email:data.email});
   })
   .catch(err=>{
@@ -90,9 +91,8 @@ app.post("/registerUser", (req, res) => {
           .insertOne(userDetails)
           .then((data) => {
             res.redirect(url.format({
-            pathname:"/home",
-            query: userDetails
-          }))})
+            pathname:"/home"
+            }))})
           .catch((err) => {
             console.log(err);
           });
@@ -104,6 +104,11 @@ app.post("/registerUser", (req, res) => {
       console.log(err);
     });
 });
+
+
+app.get('/' , (req , res)=>{
+  res.render('login.ejs');
+})
 
 app.get("/login", (req, res) => {
   res.render("login.ejs");
@@ -133,11 +138,10 @@ app.post("/updatePassword", (req, res) => {
 
 app.get("/space", async (req, res) => {  
   let spaceList = [];
-  for await (const doc of space.find()) {
+  for await (const doc of space.find({email:req.query.email})) {
     spaceList.push(doc);
   }
-  console.log(spaceList);
-  res.render("space.ejs", { spaces:JSON.stringify(spaceList) });
+  res.render("space.ejs", { spaces:JSON.stringify(spaceList), email:req.query.email });
 });
 
 app.post("/createSpace", async (req, res) => {
@@ -148,7 +152,7 @@ app.post("/createSpace", async (req, res) => {
   space
     .insertOne(spaceObject)
     .then((data) => {
-       res.redirect('/space');    
+      res.redirect('/space?email='+spaceObject["email"]);     
     })
     .catch((err) => {
       console.log(err);
@@ -161,11 +165,11 @@ app.post("/updateSpace" , async (req , res)=>{
   spaceObject["spaceId"] = parseInt(spaceObject["spaceId"]);
 
   space
-    .findOneAndUpdate({spaceId:parseInt(req.body.spaceId)} , {$set:spaceObject} , {
+    .findOneAndUpdate({spaceId:parseInt(req.body.spaceId) , email:spaceObject["email"]} , {$set:spaceObject} , {
       returnNewDocument:true
     })
     .then((data) => {
-      res.redirect('/space');     
+      res.redirect('/space?email='+spaceObject["email"]);     
     })
     .catch((err) => {
       console.log(err);
@@ -175,7 +179,7 @@ app.post("/updateSpace" , async (req , res)=>{
 
 app.post("/deleteSpace", (req, res) => {
 
-  note.deleteOne({spaceId:parseInt(req.body.spaceId)})
+  note.deleteOne({spaceId:parseInt(req.body.spaceId), email:req.body.email})
   .then(data=>{
     console.log(data);
   })
@@ -184,10 +188,9 @@ app.post("/deleteSpace", (req, res) => {
   })
 
 
-  space.deleteOne({spaceId:parseInt(req.body.spaceId)})
+  space.deleteOne({spaceId:parseInt(req.body.spaceId) , email:req.body.email})
   .then(data=>{
-    console.log(data);
-    res.redirect('/space');    
+    res.redirect('/space?email='+req.body.email);     
   })
   .catch(err=>{
     console.log(err);
@@ -198,22 +201,21 @@ app.post("/deleteSpace", (req, res) => {
 app.get("/note", async (req, res) => {  
   console.log(req.query);
   let noteList = [];
-  for await (const doc of note.find({spaceId:parseInt(req.query.spaceId)})) {
+  for await (const doc of note.find({spaceId:parseInt(req.query.spaceId) , email:req.query.email})) {
     noteList.push(doc);
   }
-  res.render("notes.ejs", { notes:JSON.stringify(noteList),spaceId: parseInt(req.query.spaceId) });
+  res.render("notes.ejs", { notes:JSON.stringify(noteList),spaceId: parseInt(req.query.spaceId) , spaceIdNo:parseInt(req.query.spaceIdNo) , email:req.query.email });
 });
 
 app.post("/createNote", async (req, res) => {
   let noteObject = req.body;
-  
   noteObject["noteId"] = parseInt(noteObject["noteId"]);
   noteObject["spaceId"] = parseInt(noteObject["spaceId"]);
 
   note
     .insertOne(noteObject)
     .then((data) => {
-       res.redirect('/note?spaceId='+noteObject["spaceId"].toString());    
+       res.redirect('/note?spaceId='+noteObject["spaceId"].toString() + '&email=' + noteObject['email']);    
     })
     .catch((err) => {
       console.log(err);
@@ -228,11 +230,11 @@ app.post("/updateNote" , async (req , res)=>{
   noteObject["spaceId"] = parseInt(noteObject["spaceId"]);
 
   note
-    .findOneAndUpdate({noteId:parseInt(req.body.noteId) , spaceId:parseInt(req.body.spaceId)} , {$set:noteObject} , {
+    .findOneAndUpdate({noteId:parseInt(req.body.noteId) , spaceId:parseInt(req.body.spaceId) , email:req.body.email} , {$set:noteObject} , {
       returnNewDocument:true
     })
     .then((data) => {
-      res.redirect('/note?spaceId='+req.body.spaceId);     
+      res.redirect('/note?spaceId='+req.body.spaceId + '&email=' + noteObject['email']);     
     })
     .catch((err) => {
       console.log(err);
@@ -241,42 +243,41 @@ app.post("/updateNote" , async (req , res)=>{
 })
 
 app.post("/deleteNote", (req, res) => {
-  note.deleteOne({noteId:req.body.noteId , spaceId:parseInt(req.body.spaceId)})
+  note.deleteOne({noteId:req.body.noteId , spaceId:parseInt(req.body.spaceId), email:req.body.email})
   .then(data=>{
     console.log(data);
-    res.redirect('/note?spaceId='+req.body.spaceId);    
+    res.redirect('/note?spaceId='+req.body.spaceId + '&email=' + req.body.email);    
   })
   .catch(err=>{
     console.log(err);
   })
 });
 
-
-
 app.get("/todo", async (req, res) => {
   // get todo
-  let redirect = '/createTodo';
+  let redirect = '/createTodo?email='+req.query.email;
   if( req.query.redirect != null && req.query.redirect != undefined && req.query.redirect != "" ){
-    redirect = req.query.redirect + "?id=" + req.query.id;
+    redirect = req.query.redirect + "?id=" + req.query.id + "&email=" + req.query.email;
   }
 
   let currentTodo = req.query;
   let todoList = [];
-  for await (const doc of todo.find()) {
+  for await (const doc of todo.find({email:req.query.email})) {
     todoList.push(doc);
   }
-  res.render("todoList.ejs", { todo: todoList , currentTodo:currentTodo , redirect: redirect });
+  res.render("todoList.ejs", { todo: todoList , currentTodo:currentTodo , redirect: redirect , email:req.query.email });
 });
 
 app.post("/createTodo", async (req, res) => {
 
   let todoObject = req.body;
   todoObject["todoId"] = Math.floor(Math.random() * 1000);
+  todoObject["email"] = req.query.email;
 
   todo
     .insertOne(todoObject)
     .then((data) => {
-       res.redirect('/todo');    
+       res.redirect('/todo?email=' + req.query.email);    
     })
     .catch((err) => {
       console.log(err);
@@ -291,11 +292,11 @@ app.post("/updateTodo" , async (req , res)=>{
 
 
   todo
-    .findOneAndUpdate({todoId:parseInt(id)} , {$set:todoObject} , {
+    .findOneAndUpdate({todoId:parseInt(id) , email:req.query.email} , {$set:todoObject} , {
       returnNewDocument:true
     })
     .then((data) => {
-       res.redirect('/todo');    
+      res.redirect('/todo?email=' + req.query.email)
     })
     .catch((err) => {
       console.log(err);
@@ -304,12 +305,12 @@ app.post("/updateTodo" , async (req , res)=>{
 })
 
 app.get("/editTodo", (req, res) => {
-  todo.findOne({todoId:parseInt(req.query.id)})
+  todo.findOne({todoId:parseInt(req.query.id) , email:req.query.email})
   .then(data=>{
     data['redirect'] = '/updateTodo';
     data['id'] = req.query.id;
     res.redirect(res.redirect(url.format({
-      pathname:"/todo",
+      pathname:'/todo?email=' + req.query.email,
       query:data,
     })));  
   })
@@ -320,10 +321,10 @@ app.get("/editTodo", (req, res) => {
 });
 
 app.get("/deleteTodo", (req, res) => {
-  todo.deleteOne({todoId:parseInt(req.query.id)})
+  todo.deleteOne({todoId:parseInt(req.query.id) , email:req.query.email})
   .then(data=>{
     console.log(data);
-    res.redirect('/todo');  
+    res.redirect('/todo?email=' + req.query.email)  
   })
   .catch(err=>{
     console.log(err);
@@ -332,4 +333,4 @@ app.get("/deleteTodo", (req, res) => {
 
 app.listen("5000", () => {
   console.log("server is started");
-});
+})

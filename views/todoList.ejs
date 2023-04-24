@@ -18,22 +18,41 @@
     <div class="container">
       <div class="navbar">
         <ul>
-          <li><a href="/home">Home</a></li>
-          <li><a href="/space">Spaces</a></li>
           <li>
-            <a class="active" style="color: #9b59b6" href="/todo">Todos</a>
+            <a
+              style="cursor: pointer"
+              class="active"
+              onClick="location.replace('/home?email='+localStorage.getItem('email'))"
+              >Home</a
+            >
           </li>
           <li>
             <a
+              style="cursor: pointer"
+              onClick="location.replace('/space?email='+localStorage.getItem('email'))"
+              >Spaces</a
+            >
+          </li>
+          <li>
+            <a
+              style="color: #9b59b6; cursor: pointer"
+              onClick="location.replace('/todo?email='+localStorage.getItem('email'))"
+              >Todos</a
+            >
+          </li>
+          <li>
+            <a
+              style="cursor: pointer"
               onClick="location.replace('/profile?email='+localStorage.getItem('email'))"
               >Profile</a
             >
           </li>
           <li style="float: right">
-            <a onclick="localStorage.clear()" href="/login">LogOut</a>
+            <a onclick="localStorage.clear()" href="/login">Logout</a>
           </li>
         </ul>
       </div>
+
 
       <div
         class="bottom"
@@ -108,13 +127,13 @@
               <ul id="todo-list">
                 <li>
                   <div>
-                    <span class="todo-text"><%=item.todoText%></span>
+                    <span class="todo-text" style="color:white"><%=item.todoText%></span>
                   </div>
                   <div>
-                    <span class="todo-date"><%=item.deadlineTime%></span>
+                    <span class="todo-date" style="color:white"><%=item.deadlineTime%></span>
                     <button class="edit-btn">
                       <a
-                        href="/editTodo?id=<%= item.todoId %>"
+                        href="/editTodo?id=<%= item.todoId %>&email=<%=email%>"
                         class="text-info"
                         data-mdb-toggle="tooltip"
                         title="Edit todo"
@@ -124,7 +143,7 @@
                     </button>
                     <button class="delete-btn">
                       <a
-                        href="/deleteTodo?id=<%= item.todoId %>"
+                        href="/deleteTodo?id=<%= item.todoId %>&email=<%=email%>"
                         class="text-danger"
                         data-mdb-toggle="tooltip"
                         title="Delete todo"

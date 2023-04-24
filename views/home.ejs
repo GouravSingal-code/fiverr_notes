@@ -2,81 +2,219 @@
 <!-- Coding By CodingNepal - youtube.com/codingnepal -->
 <html lang="en" dir="ltr">
   <head>
-    <meta charset="utf-8">
+    <meta charset="utf-8" />
     <title></title>
-    <link rel="stylesheet" href="./css/home.css">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="./css/home.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <!-- Google Font Link for Icons -->
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200">
-  
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+    />
+
     <!-- Font Awesome -->
-    
+
     <script src="./js/home.js" defer></script>
   </head>
   <body>
-
     <div class="container">
-
       <div class="navbar">
-      <ul>
-        <li><a class="active" style="color:#9B59B6" href="/home">Home</a></li>
-        <li><a href="/space">Spaces</a></li>
-        <li><a href="/todo">Todos</a></li>
-        <li><a  onClick="location.replace('/profile?email='+localStorage.getItem('email'))" >Profile</a></li>
-        <li style="float: right">
-          <a onclick="localStorage.clear()" href="/login">Logout</a>
-        </li>
-      </ul>
+        <ul>
+          <li>
+            <a
+              class="active"
+              style="color: #9b59b6; cursor: pointer"
+              onClick="location.replace('/home?email='+localStorage.getItem('email'))"
+              >Home</a
+            >
+          </li>
+          <li>
+            <a
+              style="cursor: pointer"
+              onClick="location.replace('/space?email='+localStorage.getItem('email'))"
+              >Spaces</a
+            >
+          </li>
+          <li>
+            <a
+              style="cursor: pointer"
+              onClick="location.replace('/todo?email='+localStorage.getItem('email'))"
+              >Todos</a
+            >
+          </li>
+          <li>
+            <a
+              style="cursor: pointer"
+              onClick="location.replace('/profile?email='+localStorage.getItem('email'))"
+              >Profile</a
+            >
+          </li>
+          <li style="float: right">
+            <a onclick="localStorage.clear()" href="/login">Logout</a>
+          </li>
+        </ul>
       </div>
 
-        <div class="bottom" style="display:flex;justify-content: center;align-items: center">
-            <div class="wrapper">
-                <header>
-                  <p class="todoList">TodoList</p>
-                </header>
-                <div class="list">
-                  <% for (item of todo) { %>
-                    <ul>
-                      <li style="margin:10px">
-                        <div style="float:left;color:green;font-weight: bold;">
-                          <%=item.todoText%>
-                        </div>
-                        <div style="float:right;border:solid red;background-color: lightcoral;">
-                          <%=item.deadlineTime%>
-                        </div>
-                       </li>
-                    </ul>
-                    <% } %>
+      <div class="bottom">
+        <div class="wrapper">
+          <header>
+            <p class="todoList" style="font-weight: bold">TodoList</p>
+          </header>
+          <div class="list">
+            <% for (item of todo) { %>
+            <ul>
+              <li style="margin: 10px">
+                <div style="float: left; color: black; font-weight: bold">
+                  <%=item.todoText%>
                 </div>
-            </div>
-   
-            
-            <div class="wrapper">
-                <header>
-                  <p class="current-date"></p>
-                  <div class="icons">
-                    <span id="prev" class="material-symbols-rounded">chevron_left</span>
-                    <span id="next" class="material-symbols-rounded">chevron_right</span>
-                  </div>
-                </header>
-                <div class="calendar">
-                  <ul class="weeks">
-                    <li>Sun</li>
-                    <li>Mon</li>
-                    <li>Tue</li>
-                    <li>Wed</li>
-                    <li>Thu</li>
-                    <li>Fri</li>
-                    <li>Sat</li>
-                  </ul>
-                  <ul class="days"></ul>
+                <div
+                  style="
+                    float: right;
+                    border: solid yellow;
+                    color: yellowgreen;
+                    font-weight: bold;
+                  "
+                >
+                  <%=item.deadlineTime%>
                 </div>
-            </div>
-    
+              </li>
+            </ul>
+            <% } %>
+          </div>
         </div>
-    </div>  
 
+        <div class="wrapper">
+          <header>
+            <p class="current-date"></p>
+            <div class="icons">
+              <span id="prev" class="material-symbols-rounded"
+                >chevron_left</span
+              >
+              <span id="next" class="material-symbols-rounded"
+                >chevron_right</span
+              >
+            </div>
+          </header>
+          <div class="calendar">
+            <ul class="weeks">
+              <li>Sun</li>
+              <li>Mon</li>
+              <li>Tue</li>
+              <li>Wed</li>
+              <li>Thu</li>
+              <li>Fri</li>
+              <li>Sat</li>
+            </ul>
+            <ul class="days"></ul>
+          </div>
+        </div>
+      </div>
+    </div>
 
- 
+    <script>
+      if (
+        localStorage.getItem("email") == null ||
+        localStorage.getItem("email") == undefined ||
+        localStorage.getItem("email") == ""
+      ) {
+        location.replace("/login");
+      }
+
+      let todo = '<%- JSON.stringify(todo) %>';
+      todo = JSON.parse(todo);
+
+      let todoMap = {};
+
+      for (let i = 0; i < todo.length; i++) {
+        if (!todoMap.hasOwnProperty(todo[i].deadlineTime))
+          todoMap[todo[i].deadlineTime] = [];
+
+        todoMap[todo[i].deadlineTime].push(todo[i]);
+      }
+
+      const daysTag = document.querySelector(".days"),
+        currentDate = document.querySelector(".current-date"),
+        prevNextIcon = document.querySelectorAll(".icons span");
+
+      // getting new date, current year and month
+      let date = new Date(),
+        currYear = date.getFullYear(),
+        currMonth = date.getMonth();
+
+      const months = [
+        "January",
+        "February",
+        "March",
+        "April",
+        "May",
+        "June",
+        "July",
+        "August",
+        "September",
+        "October",
+        "November",
+        "December",
+      ];
+
+      const renderCalendar = () => {
+        let firstDayofMonth = new Date(currYear, currMonth, 1).getDay(),
+          lastDateofMonth = new Date(currYear, currMonth + 1, 0).getDate(),
+          lastDayofMonth = new Date(
+            currYear,
+            currMonth,
+            lastDateofMonth
+          ).getDay(),
+          lastDateofLastMonth = new Date(currYear, currMonth, 0).getDate();
+
+        let liTag = "";
+
+        for (let i = firstDayofMonth; i > 0; i--) {
+          liTag += `<li class="inactive">${lastDateofLastMonth - i + 1}</li>`;
+        }
+
+        for (let i = 1; i <= lastDateofMonth; i++) {
+          let isToday =
+            i === date.getDate() &&
+            currMonth === new Date().getMonth() &&
+            currYear === new Date().getFullYear()
+              ? "active"
+              : "";
+
+          let curr_month = (currMonth + 1).toString();
+          curr_month = curr_month.length == 1 ? "0" + curr_month : curr_month;
+          let curr_date = i.toString();
+          curr_date = curr_date.length == 1 ? "0" + curr_date : curr_date;
+          let current_date = currYear + "-" + curr_month + "-" + curr_date;
+
+          let deadline = todoMap.hasOwnProperty(current_date) ? "deadline" : "";
+          let highalert =
+            isToday == "active" && deadline == "deadline" ? "highalert" : "";
+
+          liTag += `<li class="${isToday} ${deadline} ${highalert}"  >${i}</li>`;
+        }
+
+        for (let i = lastDayofMonth; i < 6; i++) {
+          liTag += `<li class="inactive">${i - lastDayofMonth + 1}</li>`;
+        }
+        currentDate.innerText = `${months[currMonth]} ${currYear}`; // passing current mon and yr as currentDate text
+        daysTag.innerHTML = liTag;
+      };
+      renderCalendar();
+
+      prevNextIcon.forEach((icon) => {
+        icon.addEventListener("click", () => {
+          currMonth = icon.id === "prev" ? currMonth - 1 : currMonth + 1;
+
+          if (currMonth < 0 || currMonth > 11) {
+            date = new Date(currYear, currMonth, new Date().getDate());
+            currYear = date.getFullYear();
+            currMonth = date.getMonth();
+          } else {
+            date = new Date();
+          }
+          renderCalendar();
+        });
+      });
+    </script>
   </body>
 </html>

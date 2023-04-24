@@ -11,58 +11,92 @@
       rel="stylesheet"
       href="https://unicons.iconscout.com/release/v4.0.0/css/line.css"
     />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
   </head>
   <body>
-
     <div class="container">
-
       <div class="navbar">
         <ul>
-          <li><a  href="/home">Home</a></li>
-          <li><a class="active" style="color:#9B59B6" href="/space">Spaces</a></li>
-          <li><a href="/todo">Todos</a></li>
-          <li><a  onClick="location.replace('/profile?email='+localStorage.getItem('email'))" >Profile</a></li>
-          <li style="float:right"><a onclick="localStorage.clear()" href="/login">Logout</a></li>
+          <li>
+            <a
+              style="cursor: pointer"
+              class="active"
+              onClick="location.replace('/home?email='+localStorage.getItem('email'))"
+              >Home</a
+            >
+          </li>
+          <li>
+            <a
+              style="color: #9b59b6; cursor: pointer"
+              onClick="location.replace('/space?email='+localStorage.getItem('email'))"
+              >Spaces</a
+            >
+          </li>
+          <li>
+            <a
+              style="cursor: pointer"
+              onClick="location.replace('/todo?email='+localStorage.getItem('email'))"
+              >Todos</a
+            >
+          </li>
+          <li>
+            <a
+              style="cursor: pointer"
+              onClick="location.replace('/profile?email='+localStorage.getItem('email'))"
+              >Profile</a
+            >
+          </li>
+          <li style="float: right">
+            <a onclick="localStorage.clear()" href="/login">Logout</a>
+          </li>
         </ul>
-        </div>
+      </div>
 
- 
-    <div class="popup-box">
-      <div class="popup">
-        <div class="content">
-          <header>
-            <p></p>
-            <i class="uil uil-times"></i>
-          </header>
-          <form action="/createSpace" method="post">
-            <div class="row description">
-              <label>Description</label>
-              <textarea spellcheck="false" name="spaceText" required></textarea>
-            </div>
-            <button></button>
-          </form>
+
+      <div class="popup-box">
+        <div class="popup">
+          <div class="content">
+            <header>
+              <p></p>
+              <i class="uil uil-times"></i>
+            </header>
+            <form action="/createSpace" method="post">
+              <div class="row description">
+                <label>Description</label>
+                <textarea
+                  spellcheck="false"
+                  name="spaceText"
+                  required
+                ></textarea>
+              </div>
+              <button></button>
+            </form>
+          </div>
         </div>
       </div>
-    </div>
-    <div class="wrapper">
-      <li class="add-box">
-        <div class="icon"><i class="uil uil-plus"></i></div>
-        <p>Add New Space</p>
-      </li>
-    </div>
-    
-    </div>
-    
+      <div class="wrapper">
+        <li class="add-box" style="display:none;">
+        </li>
+      </div>
 
+      <div
+        class="addtri"
+      >
+        New Space
+      </div>
+    </div>
 
     <script>
-
-if( localStorage.getItem("email") == null || localStorage.getItem("email") == undefined || localStorage.getItem("email") == ""){
-    location.replace('/login');  
-  }
-
+      if (
+        localStorage.getItem("email") == null ||
+        localStorage.getItem("email") == undefined ||
+        localStorage.getItem("email") == ""
+      ) {
+        location.replace("/login");
+      }
 
       const addBox = document.querySelector(".add-box"),
+        addtri = document.querySelector(".addtri");
         popupBox = document.querySelector(".popup-box"),
         popupTitle = popupBox.querySelector("header p"),
         closeIcon = popupBox.querySelector("header i"),
@@ -84,14 +118,14 @@ if( localStorage.getItem("email") == null || localStorage.getItem("email") == un
         "December",
       ];
       // const spaces = JSON.parse(localStorage.getItem("spaces") || "[]");
+      let email = '<%-email%>'
       let spaces = '<%- spaces %>';
       spaces = JSON.parse(spaces);
-
 
       let isUpdate = false,
         updateId;
 
-      addBox.addEventListener("click", () => {
+      addtri.addEventListener("click", () => {
         popupTitle.innerText = "Add a New Space";
         addBtn.innerText = "Add Space";
         popupBox.classList.add("show");
@@ -110,9 +144,10 @@ if( localStorage.getItem("email") == null || localStorage.getItem("email") == un
         document.querySelectorAll(".space").forEach((li) => li.remove());
         spaces.forEach((space, id) => {
           let filterDesc = space.spaceText.replaceAll("\n", "<br/>");
-          let liTag = `<li class="space"  >
-                        <div class="details" onclick="location.replace('/note?spaceId=${space.spaceId}')">
-                            <p>Space No: ${space.spaceId}</p>
+          let liTag = `<li class="space"  style="position:relative"  >
+            <i class="fa fa-expand" onclick="location.assign('/note?spaceId=${space.spaceId}&spaceIdNo=${spaces.length-id}')" style="cursor:pointer;position:absolute;font-size:24px;right:10px;top:10px;color:black"></i>            
+                        <div class="details" >
+                            <p>Space No: ${spaces.length-id}</p>
                             <span>${filterDesc}</span>
                         </div>
                         <div class="bottom-content">
@@ -150,7 +185,7 @@ if( localStorage.getItem("email") == null || localStorage.getItem("email") == un
             accept: "application.json",
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({spaceId: spaceId }),
+          body: JSON.stringify({ spaceId: spaceId , email:email }),
         })
           .then((data) => {
             console.log(data);
@@ -160,12 +195,11 @@ if( localStorage.getItem("email") == null || localStorage.getItem("email") == un
           });
 
         spaces = spaces.filter((space) => {
-
           if (space.spaceId != spaceId) {
             return space;
           }
         });
-       
+
         showSpaces();
       }
 
@@ -173,12 +207,12 @@ if( localStorage.getItem("email") == null || localStorage.getItem("email") == un
         let description = filterDesc.replaceAll("<br/>", "\r\n");
         updateId = spaceId;
         isUpdate = true;
+        popupBox.classList.add("show");
         addBox.click();
         descTag.value = description;
 
         popupTitle.innerText = "Update a space";
         addBtn.innerText = "Update space";
-
       }
 
       addBtn.addEventListener("click", (e) => {
@@ -196,16 +230,17 @@ if( localStorage.getItem("email") == null || localStorage.getItem("email") == un
               spaceText,
               date: `${month} ${day}, ${year}`,
               spaceId: updateId,
+              email:email,
             };
 
             isUpdate = false;
-            spaces = spaces.map(space=>{
-              if( space.spaceId == updateId ){
-               return spaceInfo;
-              }else{
+            spaces = spaces.map((space) => {
+              if (space.spaceId == updateId) {
+                return spaceInfo;
+              } else {
                 return space;
               }
-            })
+            });
 
             fetch("/updateSpace", {
               method: "POST",
@@ -218,13 +253,13 @@ if( localStorage.getItem("email") == null || localStorage.getItem("email") == un
               .then((data) => {})
               .catch((err) => {
                 console.log(err);
-            });
-    
+              });
           } else {
             let spaceInfo = {
               spaceText,
               date: `${month} ${day}, ${year}`,
-              spaceId: Math.floor(Math.random() * 1000)
+              spaceId: Math.floor(Math.random() * 1000),
+              email:email,
             };
             spaces.push(spaceInfo);
             fetch("/createSpace", {
@@ -239,14 +274,12 @@ if( localStorage.getItem("email") == null || localStorage.getItem("email") == un
               .catch((err) => {
                 console.log(err);
               });
-            
           }
 
           showSpaces();
           closeIcon.click();
         }
-      });   
-
+      });
     </script>
 
     <!-- <script src="./js/spaces.js"></script> -->

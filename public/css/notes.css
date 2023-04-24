@@ -7,7 +7,7 @@
   font-family: 'Poppins', sans-serif;
 }
 body{
-  background: #9B59B6;
+  background: black;
 }
 ::selection{
   color: #fff;
@@ -19,6 +19,7 @@ body{
   gap: 25px;
   grid-template-columns: repeat(auto-fill, 265px);
 }
+
 .wrapper li{
   height: 250px;
   list-style: none;
@@ -60,6 +61,7 @@ body{
 .note .details{
   max-height: 165px;
   overflow-y: auto;
+  overflow: hidden;
 }
 .note .details::-webkit-scrollbar,
 .popup textarea::-webkit-scrollbar{
@@ -270,3 +272,55 @@ form button{
 .navbar li a:hover {
   background-color: #111;
 }
+
+
+#block-container {
+  display: none;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: white;
+  padding: 20px;
+  background-color: lightgrey;
+  border-radius: 10px;
+  height:500px;
+  box-shadow: #618cf8;
+  width:800px;
+}
+
+#block-container h2 {
+  font-size: 24px;
+  margin-bottom: 10px;
+}
+
+#block-container p {
+  font-size: 16px;
+  margin-bottom: 0;
+}
+
+.space{
+  position: absolute;
+  width: 300px;
+  color: white;
+  left: 3%;
+  top: 8%;
+  font-size: 1.1em;
+  cursor: pointer;
+  border-bottom: 1px solid white; 
+}
+
+.addtri{
+  position: absolute;
+  border-radius: 5px;
+  background-color: #16a085;
+  color: white;
+  left: 3%;
+  bottom: 3%;
+  width: 120px;
+  text-align: center;
+  height: 30px;
+  font-size: 1.1em;
+  cursor: pointer;
+}
+

@@ -7,7 +7,7 @@
 }
 
 body{
-  background: #9B59B6;
+  background: black;
 }
 ::selection{
   color: #fff;
@@ -274,4 +274,18 @@ form button{
 
 .navbar li a:hover {
   background-color: #111;
+}
+
+.addtri{
+  position: absolute;
+  border-radius: 5px;
+  background-color: #16a085;
+  color: white;
+  left: 3%;
+  bottom: 3%;
+  width: 120px;
+  text-align: center;
+  height: 30px;
+  font-size: 1.1em;
+  cursor: pointer; 
 }

@@ -9,6 +9,7 @@ const userSchema = new mongoose.Schema({
 
 
 const spaceSchema = new mongoose.Schema({
+    email:String,
     spaceId:Number,
     notes:[{
        id:Number, 
@@ -18,6 +19,7 @@ const spaceSchema = new mongoose.Schema({
 })
 
 const notesSchema = new mongoose.Schema({
+  email:String,
   noteId:Number,
   spaceId:Number,
   noteTitle:String,
@@ -26,6 +28,7 @@ const notesSchema = new mongoose.Schema({
 })
 
 const todoListSchema = new mongoose.Schema({
+    email:String,
     todoId:Number,
     todoText:String,
     deadlineTime:Date 
